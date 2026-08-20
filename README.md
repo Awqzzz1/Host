@@ -1,9 +1,3 @@
-const SPREADSHEET_ID = "12n37RjWkKFvWx0ZxrzKMwYtIbKJyALj9EKFIVvdd72g";
-
-// WICHTIG: Ändere diesen Schlüssel auf etwas Eigenes, Geheimes.
-// Nur wer diesen Schlüssel kennt, kann die Gästeliste (Namen, Kontakte) einsehen.
-const ADMIN_KEY = "viki-sandra-2026-geheim";
-
 function doGet(e) {
   if (e && e.parameter && e.parameter.action === "list") {
     if (e.parameter.key !== ADMIN_KEY) {
