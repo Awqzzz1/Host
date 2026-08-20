@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<title>Host Control — Viki &amp; Sandra</title>
+<style>
+  :root{
+    --bg:#050506;
+    --glass:rgba(255,255,255,0.045);
+    --glass-strong:rgba(255,255,255,0.08);
+    --border:rgba(255,255,255,0.09);
+    --border-strong:rgba(255,255,255,0.16);
+    --text:#f5f5f7;
+    --text-dim:#98989f;
+    --text-faint:#5b5b62;
+    --violet:#8b5cf6;
+    --pink:#ff3d8a;
+    --cyan:#22d3ee;
+    --aurora:linear-gradient(115deg,var(--violet) 0%,var(--pink) 55%,var(--cyan) 100%);
+    --radius-lg:24px;
+    --radius-md:16px;
+    --radius-sm:10px;
+    --ease:cubic-bezier(.16,1,.3,1);
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0;min-height:100vh;background:var(--bg);color:var(--text);
+    font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI",Helvetica,Arial,sans-serif;
+    -webkit-font-smoothing:antialiased;
+  }
+  .topbar{
+    display:flex;align-items:center;justify-content:space-between;
+    padding:18px 6vw;border-bottom:1px solid var(--border);
+  }
+  .logo{font-size:16px;font-weight:600}
+  .logo b{background:var(--aurora);-webkit-background-clip:text;background-clip:text;color:transparent}
+  .badge{font-size:11px;color:var(--text-faint);letter-spacing:1px;text-transform:uppercase}
+
+  /* Login */
+  .login-wrap{
+    min-height:80vh;display:flex;align-items:center;justify-content:center;padding:6vw;
+  }
+  .login-card{
+    width:100%;max-width:380px;background:var(--glass);border:1px solid var(--border);
+    border-radius:var(--radius-lg);padding:36px;backdrop-filter:blur(14px);
+  }
+  .login-card h1{font-size:22px;font-weight:600;margin:0 0 6px;letter-spacing:-.3px}
+  .login-card p{color:var(--text-dim);font-size:13px;margin:0 0 26px}
+  .field{margin-bottom:16px}
+  .field label{display:block;font-size:11px;font-weight:600;letter-spacing:1px;color:var(--text-faint);margin-bottom:8px;text-transform:uppercase}
+  .field input{
+    width:100%;padding:13px 14px;background:rgba(255,255,255,.03);
+    border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text);
+    font-size:14px;outline:none;transition:border-color .3s var(--ease);
+  }
+  .field input:focus{border-color:var(--violet)}
+  button{
+    width:100%;border:0;cursor:pointer;padding:14px;border-radius:99px;
+    background:var(--text);color:#050506;font-weight:600;font-size:14px;
+    transition:transform .3s var(--ease),opacity .3s var(--ease);
+  }
+  button:hover:not(:disabled){transform:scale(1.015)}
+  button:disabled{opacity:.6;cursor:default}
+  .login-err{
+    display:none;margin-top:14px;padding:12px 14px;border-radius:var(--radius-sm);
+    font-size:13px;background:rgba(255,61,138,.08);border:1px solid rgba(255,61,138,.25);color:#ff9dc0;
+  }
+  .login-err.show{display:block}
+
+  /* Dashboard */
+  .dashboard{display:none;padding:40px 6vw 80px}
+  .dashboard.show{display:block}
+  .stats{display:flex;gap:14px;flex-wrap:wrap;margin-bottom:32px}
+  .stat{
+    background:var(--glass);border:1px solid var(--border);border-radius:var(--radius-md);
+    padding:20px 26px;min-width:140px;
+  }
+  .stat .num{font-size:28px;font-weight:600;background:var(--aurora);-webkit-background-clip:text;background-clip:text;color:transparent}
+  .stat .label{font-size:11px;color:var(--text-faint);letter-spacing:1px;text-transform:uppercase;margin-top:4px}
+
+  .toolbar{display:flex;justify-content:space-between;align-items:center;gap:16px;margin-bottom:20px;flex-wrap:wrap}
+  .search{
+    flex:1;min-width:220px;padding:12px 16px;background:rgba(255,255,255,.03);
+    border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text);font-size:14px;outline:none;
+  }
+  .search:focus{border-color:var(--violet)}
+  .logout{
+    font-size:12px;font-weight:600;padding:9px 18px;border-radius:99px;
+    border:1px solid var(--border-strong);background:var(--glass);color:var(--text);cursor:pointer;
+  }
+  .logout:hover{background:var(--glass-strong)}
+
+  table{width:100%;border-collapse:collapse;background:var(--glass);border:1px solid var(--border);border-radius:var(--radius-md);overflow:hidden}
+  thead th{
+    text-align:left;font-size:11px;letter-spacing:1px;text-transform:uppercase;color:var(--text-faint);
+    padding:14px 18px;border-bottom:1px solid var(--border);font-weight:600;
+  }
+  tbody td{padding:16px 18px;border-bottom:1px solid var(--border);font-size:14px;vertical-align:top}
+  tbody tr:last-child td{border-bottom:0}
+  tbody tr:hover{background:rgba(255,255,255,.02)}
+  .name-cell{font-weight:600}
+  .contact-cell{color:var(--text-dim)}
+  .rules-yes{color:#7fe9f7}
+  .rules-no{color:var(--pink)}
+  .time-cell{color:var(--text-faint);font-size:12px;white-space:nowrap}
+
+  .empty, .loading{color:var(--text-dim);font-size:14px;padding:40px;text-align:center}
+
+  @media(max-width:700px){
+    table, thead, tbody, tr, td{display:block}
+    thead{display:none}
+    tbody tr{border-bottom:1px solid var(--border);padding:14px 0}
+    tbody td{border:0;padding:4px 0}
+    .name-cell{font-size:16px}
+  }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="logo">VIKI <b>&</b> SANDRA — Host Control</div>
+  <div class="badge">Nicht öffentlich verlinkt</div>
+</div>
+
+<!-- LOGIN -->
+<div class="login-wrap" id="loginWrap">
+  <div class="login-card">
+    <h1>Host-Login</h1>
+    <p>Melde dich an, um die Gästeliste zu sehen.</p>
+    <div class="field">
+      <label for="email">E-Mail</label>
+      <input id="email" type="email" autocomplete="username" placeholder="host@viki-sandra-party.de">
+    </div>
+    <div class="field">
+      <label for="password">Passwort</label>
+      <input id="password" type="password" autocomplete="current-password" placeholder="••••••••">
+    </div>
+    <button id="loginBtn" type="button">Einloggen →</button>
+    <div class="login-err" id="loginErr">Login fehlgeschlagen. E-Mail oder Passwort prüfen.</div>
+  </div>
+</div>
+
+<!-- DASHBOARD -->
+<div class="dashboard" id="dashboard">
+  <div class="stats">
+    <div class="stat"><div class="num" id="statTotal">0</div><div class="label">Angemeldet</div></div>
+    <div class="stat"><div class="num" id="statRules">0</div><div class="label">Hausordnung akzeptiert</div></div>
+  </div>
+
+  <div class="toolbar">
+    <input class="search" id="search" type="text" placeholder="Nach Name oder Kontakt suchen…">
+    <button class="logout" id="logoutBtn" type="button">Ausloggen</button>
+  </div>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Kontakt</th>
+        <th>Hausordnung</th>
+        <th>Angemeldet am</th>
+      </tr>
+    </thead>
+    <tbody id="guestTableBody"></tbody>
+  </table>
+  <div class="empty" id="emptyState" style="display:none">Noch keine Anmeldungen.</div>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/10.13.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.1/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.1/firebase-firestore-compat.js"></script>
+
+<script>
+/* ============================================================
+   FIREBASE-CONFIG — dieselben Werte wie in index.html
+   HIER FIREBASE-CONFIG EINFÜGEN
+   ============================================================ */
+const firebaseConfig = {
+  apiKey: "AIzaSyDX98Yf-S0BBZMt84yxJX_r9IercJLLiv4",
+  authDomain: "viki-sandra-geburtstag.firebaseapp.com",
+  projectId: "viki-sandra-geburtstag",
+  storageBucket: "viki-sandra-geburtstag.firebasestorage.app",
+  messagingSenderId: "788097416175",
+  appId: "1:788097416175:web:17cec1917b1070b4d2941a"
+};
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db = firebase.firestore();
+
+const loginWrap = document.getElementById('loginWrap');
+const dashboard = document.getElementById('dashboard');
+const loginBtn = document.getElementById('loginBtn');
+const logoutBtn = document.getElementById('logoutBtn');
+const loginErr = document.getElementById('loginErr');
+const emailInput = document.getElementById('email');
+const passwordInput = document.getElementById('password');
+const tbody = document.getElementById('guestTableBody');
+const emptyState = document.getElementById('emptyState');
+const statTotal = document.getElementById('statTotal');
+const statRules = document.getElementById('statRules');
+const searchInput = document.getElementById('search');
+
+let allGuests = [];
+let unsubscribe = null;
+
+loginBtn.addEventListener('click', function () {
+  loginErr.classList.remove('show');
+  loginBtn.disabled = true;
+  loginBtn.textContent = 'Einloggen…';
+  auth.signInWithEmailAndPassword(emailInput.value.trim(), passwordInput.value)
+    .catch(function (err) {
+      console.error(err);
+      loginErr.classList.add('show');
+    })
+    .finally(function () {
+      loginBtn.disabled = false;
+      loginBtn.textContent = 'Einloggen →';
+    });
+});
+
+passwordInput.addEventListener('keydown', function (e) {
+  if (e.key === 'Enter') loginBtn.click();
+});
+
+logoutBtn.addEventListener('click', function () {
+  auth.signOut();
+});
+
+auth.onAuthStateChanged(function (user) {
+  if (user) {
+    loginWrap.style.display = 'none';
+    dashboard.classList.add('show');
+    subscribeToGuests();
+  } else {
+    dashboard.classList.remove('show');
+    loginWrap.style.display = 'flex';
+    if (unsubscribe) { unsubscribe(); unsubscribe = null; }
+    allGuests = [];
+    tbody.innerHTML = '';
+  }
+});
+
+function subscribeToGuests(){
+  unsubscribe = db.collection('guests')
+    .orderBy('registeredAt', 'desc')
+    .onSnapshot(function (snapshot) {
+      allGuests = snapshot.docs.map(function (doc) {
+        const data = doc.data();
+        return {
+          id: doc.id,
+          name: data.name || '',
+          contact: data.contact || '',
+          rulesAccepted: !!data.rulesAccepted,
+          registeredAt: data.registeredAt ? data.registeredAt.toDate() : null
+        };
+      });
+      render(allGuests);
+    }, function (err) {
+      console.error('Gästeliste konnte nicht geladen werden:', err);
+      tbody.innerHTML = '';
+      emptyState.style.display = 'block';
+      emptyState.textContent = 'Gästeliste konnte nicht geladen werden.';
+    });
+}
+
+function formatDate(d){
+  if (!d) return '—';
+  return d.toLocaleDateString('de-DE', { day:'2-digit', month:'2-digit', year:'numeric' }) +
+    ' · ' + d.toLocaleTimeString('de-DE', { hour:'2-digit', minute:'2-digit' });
+}
+
+// Escaping gegen XSS: Gästedaten kommen von der öffentlichen Website und
+// werden hier NIE per innerHTML, sondern per textContent gerendert.
+function render(guests){
+  const q = searchInput.value.trim().toLowerCase();
+  const filtered = q
+    ? guests.filter(function (g) {
+        return g.name.toLowerCase().includes(q) || g.contact.toLowerCase().includes(q);
+      })
+    : guests;
+
+  statTotal.textContent = guests.length;
+  statRules.textContent = guests.filter(function (g) { return g.rulesAccepted; }).length;
+
+  tbody.innerHTML = '';
+  if (filtered.length === 0){
+    emptyState.style.display = 'block';
+    emptyState.textContent = guests.length === 0 ? 'Noch keine Anmeldungen.' : 'Keine Treffer für diese Suche.';
+    return;
+  }
+  emptyState.style.display = 'none';
+
+  filtered.forEach(function (g) {
+    const tr = document.createElement('tr');
+
+    const tdName = document.createElement('td');
+    tdName.className = 'name-cell';
+    tdName.textContent = g.name;
+
+    const tdContact = document.createElement('td');
+    tdContact.className = 'contact-cell';
+    tdContact.textContent = g.contact || '—';
+
+    const tdRules = document.createElement('td');
+    tdRules.textContent = g.rulesAccepted ? '✓ Ja' : '✕ Nein';
+    tdRules.className = g.rulesAccepted ? 'rules-yes' : 'rules-no';
+
+    const tdTime = document.createElement('td');
+    tdTime.className = 'time-cell';
+    tdTime.textContent = formatDate(g.registeredAt);
+
+    tr.append(tdName, tdContact, tdRules, tdTime);
+    tbody.appendChild(tr);
+  });
+}
+
+searchInput.addEventListener('input', function () { render(allGuests); });
+</script>
+</body>
+</html>
